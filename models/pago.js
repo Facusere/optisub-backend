@@ -39,6 +39,10 @@ module.exports = (sequelize, DataTypes) => {
       validate: {
         notEmpty: true
       }
+    },
+    moneda: {
+      type: DataTypes.STRING,
+      allowNull: true // Temporalmente true para compatibilidad
     }
   }, {
     sequelize,

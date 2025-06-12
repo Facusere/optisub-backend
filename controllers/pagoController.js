@@ -34,8 +34,8 @@ module.exports = {
     if (!errors.isEmpty()) return res.status(422).json({ errors: errors.array() });
 
     try {
-      const { suscripcionId, fechaPago, montoPagado, metodoPago } = req.body;
-      const nuevoPago = await Pago.create({ suscripcionId, fechaPago, montoPagado, metodoPago });
+      const { suscripcionId, fechaPago, montoPagado, metodoPago, moneda } = req.body;
+      const nuevoPago = await Pago.create({ suscripcionId, fechaPago, montoPagado, metodoPago, moneda });
       res.status(201).json(nuevoPago);
     } catch (err) {
       res.status(400).json({ error: err.message });
@@ -48,7 +48,8 @@ module.exports = {
       const pago = await Pago.findByPk(req.params.id);
       if (!pago) return res.status(404).json({ error: 'Pago no encontrado' });
 
-      await pago.update(req.body);
+      const { suscripcionId, fechaPago, montoPagado, metodoPago, moneda } = req.body;
+      await pago.update({ suscripcionId, fechaPago, montoPagado, metodoPago, moneda });
       res.json(pago);
     } catch (err) {
       res.status(400).json({ error: err.message });

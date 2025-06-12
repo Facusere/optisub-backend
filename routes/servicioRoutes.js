@@ -6,9 +6,7 @@ const servicioController = require('../controllers/servicioController');
 // Validaciones para crear o editar servicio
 const validarServicio = [
   body('nombre').notEmpty().withMessage('El nombre del servicio es obligatorio'),
-  body('categoriaId').isInt().withMessage('La categoría debe ser un número entero'),
-  body('logoUrl').optional().isURL().withMessage('El logo debe ser una URL válida'),
-  body('sitioWeb').optional().isURL().withMessage('El sitio web debe ser una URL válida')
+  body('categoriaId').isInt().withMessage('La categoría debe ser un número entero')
 ];
 
 // Middleware de validación

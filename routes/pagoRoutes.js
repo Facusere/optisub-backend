@@ -8,7 +8,8 @@ const validarPago = [
   body('suscripcionId').isInt().withMessage('El ID de la suscripción debe ser un número entero'),
   body('fechaPago').isISO8601().withMessage('La fecha de pago debe tener un formato válido'),
   body('montoPagado').isDecimal().withMessage('El monto pagado debe ser un número'),
-  body('metodoPago').notEmpty().withMessage('El método de pago es obligatorio')
+  body('metodoPago').notEmpty().withMessage('El método de pago es obligatorio'),
+  body('moneda').optional().isString().withMessage('La moneda debe ser un string')
 ];
 
 // Middleware para validar
