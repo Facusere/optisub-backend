@@ -29,7 +29,9 @@ module.exports = {
         password: hashedPassword,
         moneda_preferida
       });
-      res.status(201).json(nuevo);
+      // Generar token igual que en login
+      const token = jwt.sign({ id: nuevo.id }, JWT_SECRET, { expiresIn: '2h' });
+      res.status(201).json({ token, usuario: nuevo });
     } catch (err) {
       res.status(400).json({ error: err.message });
     }

@@ -66,4 +66,5 @@ module.exports = {
     }
   }
 };
+// No se requieren cambios aquí para los costos.
 
