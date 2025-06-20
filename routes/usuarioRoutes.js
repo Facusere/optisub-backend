@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { body, validationResult } = require('express-validator');
 const usuarioController = require('../controllers/usuarioController');
+const verifyToken = require('../middlewares/verifyToken');
 
 // Validaciones para crear usuario
 const validarUsuario = [
@@ -24,7 +25,7 @@ const checkValidaciones = (req, res, next) => {
 
 // Rutas
 // GET /api/usuarios - Lista todos los usuarios
-router.get('/', usuarioController.getUsuarios);
+router.get('/', verifyToken, usuarioController.getUsuarios);
 
 // POST /api/usuarios - Crea un usuario nuevo (con validaciones)
 router.post(

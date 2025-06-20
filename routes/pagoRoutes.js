@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { body, validationResult } = require('express-validator');
 const pagoController = require('../controllers/pagoController');
+const verifyToken = require('../middlewares/verifyToken');
 
 // Validaciones para crear o editar un pago
 const validarPago = [
@@ -23,11 +24,12 @@ const checkValidaciones = (req, res, next) => {
 
 // Rutas
 // GET /api/pagos - Lista todos los pagos
-router.get('/', pagoController.getPagos);
+router.get('/', verifyToken, pagoController.getPagos);
 
 // POST /api/pagos - Crea un pago nuevo
 router.post(
   '/',
+  verifyToken,
   validarPago,
   checkValidaciones,
   pagoController.createPago
@@ -36,12 +38,13 @@ router.post(
 // PUT /api/pagos/:id - Actualiza un pago existente
 router.put(
   '/:id',
+  verifyToken,
   validarPago,
   checkValidaciones,
   pagoController.updatePago
 );
 
 // DELETE /api/pagos/:id - Elimina un pago
-router.delete('/:id', pagoController.deletePago);
+router.delete('/:id', verifyToken, pagoController.deletePago);
 
 module.exports = router;

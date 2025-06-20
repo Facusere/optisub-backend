@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { body, validationResult } = require('express-validator');
 const suscripcionController = require('../controllers/suscripcionController');
+const verifyToken = require('../middlewares/verifyToken');
 
 // Validaciones para crear o editar suscripción
 const validarSuscripcion = [
@@ -25,15 +26,15 @@ const checkValidaciones = (req, res, next) => {
 
 // Rutas
 // GET /api/suscripciones - Lista todas las suscripciones
-router.get('/', suscripcionController.getSuscripciones);
+router.get('/', verifyToken, suscripcionController.getSuscripciones);
 
 // POST /api/suscripciones - Crea una suscripción nueva
-router.post('/', validarSuscripcion, checkValidaciones, suscripcionController.createSuscripcion);
+router.post('/', verifyToken, validarSuscripcion, checkValidaciones, suscripcionController.createSuscripcion);
 
 // PUT /api/suscripciones/:id - Actualiza una suscripción existente
-router.put('/:id', validarSuscripcion, checkValidaciones, suscripcionController.updateSuscripcion);
+router.put('/:id', verifyToken, validarSuscripcion, checkValidaciones, suscripcionController.updateSuscripcion);
 
 // DELETE /api/suscripciones/:id - Elimina una suscripción
-router.delete('/:id', suscripcionController.deleteSuscripcion);
+router.delete('/:id', verifyToken, suscripcionController.deleteSuscripcion);
 
 module.exports = router;

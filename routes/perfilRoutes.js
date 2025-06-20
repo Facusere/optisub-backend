@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { body, validationResult } = require('express-validator');
 const perfilController = require('../controllers/perfilController');
+const verifyToken = require('../middlewares/verifyToken');
 
 // Validaciones para crear/editar perfil
 const validarPerfil = [
@@ -21,11 +22,12 @@ const checkValidaciones = (req, res, next) => {
 
 // Rutas
 // GET /api/perfiles - Lista todos los perfiles
-router.get('/', perfilController.getPerfiles);
+router.get('/', verifyToken, perfilController.getPerfiles);
 
 // POST /api/perfiles - Crea un perfil nuevo
 router.post(
   '/',
+  verifyToken,
   validarPerfil,
   checkValidaciones,
   perfilController.createPerfil
@@ -34,13 +36,14 @@ router.post(
 // PUT /api/perfiles/:id - Actualiza un perfil existente
 router.put(
   '/:id',
+  verifyToken,
   validarPerfil,
   checkValidaciones,
   perfilController.updatePerfil
 );
 
 // DELETE /api/perfiles/:id - Elimina un perfil
-router.delete('/:id', perfilController.deletePerfil);
+router.delete('/:id', verifyToken, perfilController.deletePerfil);
 
 module.exports = router;
 

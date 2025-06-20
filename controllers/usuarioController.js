@@ -2,19 +2,29 @@ const { Usuario } = require('../models');
 const { validationResult } = require('express-validator');
 
 module.exports = {
-  // Devuelve todos los usuarios de la base de datos.
+  // Devuelve todos los usuarios de la base de datos SOLO si es admin, si no, solo su propio usuario.
   getUsuarios: async (req, res) => {
     try {
-      const usuarios = await Usuario.findAll();
-      res.json(usuarios);
+      // Si el usuario tiene un campo 'admin' true, puede ver todos. Si no, solo su propio usuario.
+      if (req.user && req.user.admin) {
+        const usuarios = await Usuario.findAll();
+        return res.json(usuarios);
+      }
+      // Solo su propio usuario
+      const usuario = await Usuario.findByPk(req.user.id);
+      if (!usuario) return res.status(404).json({ error: 'Usuario no encontrado' });
+      res.json([usuario]);
     } catch (err) {
       res.status(500).json({ error: err.message });
     }
   },
 
-  // Devuelve un usuario específico por su ID.
+  // Devuelve un usuario específico por su ID SOLO si es el mismo usuario autenticado o admin.
   getUsuarioById: async (req, res) => {
     try {
+      if (parseInt(req.params.id) !== req.user.id && !(req.user && req.user.admin)) {
+        return res.status(403).json({ error: 'No autorizado' });
+      }
       const usuario = await Usuario.findByPk(req.params.id);
       if (!usuario) return res.status(404).json({ error: 'Usuario no encontrado' });
       res.json(usuario);
@@ -40,6 +50,9 @@ module.exports = {
   // Actualiza los datos de un usuario existente.
   updateUsuario: async (req, res) => {
     try {
+      if (parseInt(req.params.id) !== req.user.id && !(req.user && req.user.admin)) {
+        return res.status(403).json({ error: 'No autorizado' });
+      }
       const usuario = await Usuario.findByPk(req.params.id);
       if (!usuario) return res.status(404).json({ error: 'Usuario no encontrado' });
 
@@ -53,6 +66,9 @@ module.exports = {
   // Elimina un usuario por su ID.
   deleteUsuario: async (req, res) => {
     try {
+      if (parseInt(req.params.id) !== req.user.id && !(req.user && req.user.admin)) {
+        return res.status(403).json({ error: 'No autorizado' });
+      }
       const usuario = await Usuario.findByPk(req.params.id);
       if (!usuario) return res.status(404).json({ error: 'Usuario no encontrado' });
 

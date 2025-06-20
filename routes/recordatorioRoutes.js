@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { body, validationResult } = require('express-validator');
 const recordatorioController = require('../controllers/recordatorioController');
+const verifyToken = require('../middlewares/verifyToken');
 
 // Validaciones
 const validarRecordatorio = [
@@ -25,22 +26,24 @@ const checkValidaciones = (req, res, next) => {
 
 // Rutas
 // GET /api/recordatorios - Lista todos los recordatorios
-router.get('/', recordatorioController.getRecordatorios);
+router.get('/', verifyToken, recordatorioController.getRecordatorios);
 
 // POST /api/recordatorios - Crea un recordatorio nuevo
 router.post(
   '/',
+  verifyToken,
   validarRecordatorio,
   checkValidaciones,
   recordatorioController.createRecordatorio
 );
 
 // DELETE /api/recordatorios/:id - Elimina un recordatorio
-router.delete('/:id', recordatorioController.deleteRecordatorio);
+router.delete('/:id', verifyToken, recordatorioController.deleteRecordatorio);
 
 // PUT /api/recordatorios/:id - Actualiza un recordatorio existente
 router.put(
   '/:id',
+  verifyToken,
   validarRecordatorio,
   checkValidaciones,
   recordatorioController.updateRecordatorio

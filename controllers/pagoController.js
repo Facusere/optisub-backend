@@ -2,39 +2,51 @@ const { Pago } = require('../models');
 const { validationResult } = require('express-validator');
 
 module.exports = {
-  // Devuelve todos los pagos de la base de datos (puede filtrar por método).
+  // Devuelve todos los pagos SOLO de las suscripciones del usuario autenticado.
   getPagos: async (req, res) => {
     try {
-      const where = {};
-      if (req.query.metodo) {
-        where.metodoPago = req.query.metodo;
-      }
-
-      const pagos = await Pago.findAll({ where });
+      const { Suscripcion, Perfil } = require('../models');
+      const perfiles = await Perfil.findAll({ where: { usuarioId: req.user.id } });
+      const perfilIds = perfiles.map(p => p.id);
+      if (perfilIds.length === 0) return res.json([]);
+      const suscripciones = await Suscripcion.findAll({ where: { perfilId: perfilIds } });
+      const suscripcionIds = suscripciones.map(s => s.id);
+      if (suscripcionIds.length === 0) return res.json([]);
+      const pagos = await Pago.findAll({ where: { suscripcionId: suscripcionIds } });
       res.json(pagos);
     } catch (err) {
       res.status(500).json({ error: err.message });
     }
   },
 
-  // Devuelve un pago específico por su ID.
+  // Devuelve un pago específico SOLO si pertenece a una suscripción del usuario autenticado.
   getPagoById: async (req, res) => {
     try {
       const pago = await Pago.findByPk(req.params.id);
       if (!pago) return res.status(404).json({ error: 'Pago no encontrado' });
+      const { Suscripcion, Perfil } = require('../models');
+      const suscripcion = await Suscripcion.findByPk(pago.suscripcionId);
+      if (!suscripcion) return res.status(404).json({ error: 'Suscripción no encontrada' });
+      const perfil = await Perfil.findByPk(suscripcion.perfilId);
+      if (!perfil || perfil.usuarioId !== req.user.id) return res.status(403).json({ error: 'No autorizado' });
       res.json(pago);
     } catch (err) {
       res.status(500).json({ error: err.message });
     }
   },
 
-  // Crea un nuevo pago.
+  // Crea un nuevo pago SOLO si la suscripción pertenece al usuario autenticado.
   createPago: async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(422).json({ errors: errors.array() });
 
     try {
       const { suscripcionId, fechaPago, montoPagado, metodoPago, moneda } = req.body;
+      const { Suscripcion, Perfil } = require('../models');
+      const suscripcion = await Suscripcion.findByPk(suscripcionId);
+      if (!suscripcion) return res.status(404).json({ error: 'Suscripción no encontrada' });
+      const perfil = await Perfil.findByPk(suscripcion.perfilId);
+      if (!perfil || perfil.usuarioId !== req.user.id) return res.status(403).json({ error: 'No autorizado' });
       const nuevoPago = await Pago.create({ suscripcionId, fechaPago, montoPagado, metodoPago, moneda });
       res.status(201).json(nuevoPago);
     } catch (err) {
@@ -42,12 +54,16 @@ module.exports = {
     }
   },
 
-  // Actualiza los datos de un pago existente.
+  // Actualiza los datos de un pago existente SOLO si pertenece al usuario autenticado.
   updatePago: async (req, res) => {
     try {
       const pago = await Pago.findByPk(req.params.id);
       if (!pago) return res.status(404).json({ error: 'Pago no encontrado' });
-
+      const { Suscripcion, Perfil } = require('../models');
+      const suscripcion = await Suscripcion.findByPk(pago.suscripcionId);
+      if (!suscripcion) return res.status(404).json({ error: 'Suscripción no encontrada' });
+      const perfil = await Perfil.findByPk(suscripcion.perfilId);
+      if (!perfil || perfil.usuarioId !== req.user.id) return res.status(403).json({ error: 'No autorizado' });
       const { suscripcionId, fechaPago, montoPagado, metodoPago, moneda } = req.body;
       await pago.update({ suscripcionId, fechaPago, montoPagado, metodoPago, moneda });
       res.json(pago);
@@ -56,17 +72,18 @@ module.exports = {
     }
   },
 
-  // Elimina un pago por su ID.
+  // Elimina un pago por su ID SOLO si pertenece al usuario autenticado.
   deletePago: async (req, res) => {
     try {
-      const { id } = req.params;
-      const eliminado = await Pago.destroy({ where: { id } });
-
-      if (eliminado === 0) {
-        return res.status(404).json({ error: 'Pago no encontrado' });
-      }
-
-      res.json({ mensaje: 'Pago eliminado correctamente' });
+      const pago = await Pago.findByPk(req.params.id);
+      if (!pago) return res.status(404).json({ error: 'Pago no encontrado' });
+      const { Suscripcion, Perfil } = require('../models');
+      const suscripcion = await Suscripcion.findByPk(pago.suscripcionId);
+      if (!suscripcion) return res.status(404).json({ error: 'Suscripción no encontrada' });
+      const perfil = await Perfil.findByPk(suscripcion.perfilId);
+      if (!perfil || perfil.usuarioId !== req.user.id) return res.status(403).json({ error: 'No autorizado' });
+      await pago.destroy();
+      res.json({ mensaje: 'Pago eliminado' });
     } catch (err) {
       res.status(500).json({ error: err.message });
     }
