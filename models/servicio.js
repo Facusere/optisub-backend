@@ -10,7 +10,10 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'categoriaId',
         as: 'categoria'
       });
-
+      Servicio.belongsTo(models.Usuario, {
+        foreignKey: 'usuarioId',
+        as: 'usuario'
+      });
       Servicio.hasMany(models.Suscripcion, {
         foreignKey: 'servicioId',
         as: 'suscripciones'
@@ -43,6 +46,14 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: true,
       validate: {
         isUrl: true
+      }
+    },
+    usuarioId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: 'Usuarios',
+        key: 'id'
       }
     }
   }, {
